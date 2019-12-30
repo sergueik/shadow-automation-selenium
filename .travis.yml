@@ -1,11 +1,10 @@
 language: java
-jdk: oraclejdk8
+jdk: openjdk8
 sudo: false
 dist: trusty
 services:
   - xvfb
 
-# install: true
 addons:
   chrome: stable
   apt:

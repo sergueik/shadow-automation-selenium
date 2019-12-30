@@ -26,12 +26,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 // https://www.baeldung.com/junit-before-beforeclass-beforeeach-beforeall
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -39,6 +39,7 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
 import io.github.sukgu.Shadow;
+import io.github.bonigarcia.wdm.WebDriverManager;
 
 public class ShadowTest {
 
@@ -47,15 +48,6 @@ public class ShadowTest {
 	private static final String urlLocator = "*[data-route='url']";
 	private boolean debug = Boolean
 			.parseBoolean(getPropertyEnv("DEBUG", "false"));;
-	protected static String osName = getOSName();
-	private static final Map<String, String> browserDrivers = new HashMap<>();
-	static {
-		browserDrivers.put("chrome",
-				osName.equals("windows") ? "chromedriver.exe" : "chromedriver");
-		browserDrivers.put("firefox",
-				osName.equals("windows") ? "geckodriver.exe" : "driver");
-		browserDrivers.put("edge", "MicrosoftWebDriver.exe");
-	}
 
 	private static ChromeDriver driver = null;
 	private static Shadow shadow = null;
@@ -64,42 +56,19 @@ public class ShadowTest {
 	private static final boolean headless = Boolean
 			.parseBoolean(getPropertyEnv("HEADLESS", "false"));
 
-	public static String getBrowser() {
-		return browser;
-	}
-
-	public static void setBrowser(String browser) {
-		ShadowTest.browser = browser;
-	}
-
-	@BeforeClass
+	@BeforeAll
 	public static void injectShadowJS() {
 		err.println("Launching " + browser);
 		if (browser.equals("chrome")) {
+			WebDriverManager.chromedriver().setup();
+			driver = new ChromeDriver();
+			driver.navigate().to(baseUrl);
 		} // TODO: finish for other browser
 
-		System
-				.setProperty("webdriver.chrome.driver",
-						Paths.get(System.getProperty("user.home"))
-								.resolve("Downloads").resolve(osName.equals("windows")
-										? "chromedriver.exe" : "chromedriver")
-								.toAbsolutePath().toString());
-
-		// https://peter.sh/experiments/chromium-command-line-switches/
-		ChromeOptions options = new ChromeOptions();
-		// options for headless
-		if (headless) {
-			for (String arg : (new String[] { "headless", "window-size=1200x800" })) {
-				options.addArguments(arg);
-			}
-		}
-
-		driver = new ChromeDriver(options);
-		driver.navigate().to(baseUrl);
 		shadow = new Shadow(driver);
 	}
 
-	@Before
+	@BeforeEach
 	public void init() {
 
 	}
@@ -122,14 +91,13 @@ public class ShadowTest {
 		List<WebElement> elements = shadow.findElements(urlLocator);
 		assertThat(elements, notNullValue());
 		assertThat(elements.size(), greaterThan(0));
-		err.println(String.format("Located %d elements:", elements.size()));
-		elements.stream().forEach(err::println);
-		elements.stream().map(o -> o.getTagName()).forEach(err::println);
-		// default toString() is not be particularly useful
-		elements.stream().forEach(err::println);
+		err.println(String.format("Found %d elements:", elements.size()));
+		/* elements.stream().forEach(err::println);
+		 elements.stream().map(o -> o.getTagName()).forEach(err::println);
 		elements.stream()
 				.map(o -> String.format("innerHTML: %s", o.getAttribute("innerHTML")))
 				.forEach(err::println);
+				*/
 		elements.stream()
 				.map(o -> String.format("outerHTML: %s", o.getAttribute("outerHTML")))
 				.forEach(err::println);
@@ -143,83 +111,58 @@ public class ShadowTest {
 
 		WebElement element1 = shadow.getNextSiblingElement(element);
 		assertThat(element1, notNullValue());
-		// TODO: examine the collection of elements returned earlier
+		// TODO: compare siblings
 	}
 
 	@Test
 	public void testAPICalls2() {
-		List<WebElement> elements = shadow.findElements(urlLocator);
-		assertThat(elements, notNullValue());
-		assertThat(elements.size(), greaterThan(0));
-		err.println(String.format("Located %d elements:", elements.size()));
-		WebElement element = elements.stream()
+		WebElement element = shadow.findElements(urlLocator).stream()
 				.filter(o -> o.getTagName().matches("div")).collect(Collectors.toList())
 				.get(0);
-		elements = shadow.findElements(element, "img");
+		List<WebElement> elements = shadow.findElements(element, "img");
 		assertThat(elements, notNullValue());
 		assertThat(elements.size(), greaterThan(0));
 	}
 
-	@Ignore
-	// TODO:
+	@Disabled("Disabled until getSiblingElements javascript error: object.siblings is not a function is addressed")
 	@Test
 	public void testAPICalls3() {
 		WebElement element = shadow.findElement(urlLocator);
 		List<WebElement> elements = shadow.getSiblingElements(element);
-		// javascript error: object.siblings is not a function
-		// https://www.w3schools.com/jquery/traversing_siblings.asp
 		assertThat(elements, notNullValue());
 		assertThat(elements.size(), greaterThan(0));
 	}
 
-	@Ignore
-	// TODO:
+	@Disabled("Disabled until getChildElements javascript error: Illegal invocation is addressed")
 	@Test
 	public void testAPICalls4() {
 		WebElement element = shadow.findElement(urlLocator);
 		List<WebElement> elements = shadow.getChildElements(element);
-		// javascript error: Illegal invocation
-		// https://stackoverflow.com/questions/10743596/why-are-certain-function-calls-termed-illegal-invocations-in-javascript
 		assertThat(elements, notNullValue());
 		assertThat(elements.size(), greaterThan(0));
-
 	}
 
 	@Test
 	public void testAPICalls5() {
-		WebElement element = shadow.findElement(urlLocator);
-		List<WebElement> elements = shadow.findElements(element, "#wrapperLink");
+		List<WebElement> elements = shadow
+				.findElements(shadow.findElement(urlLocator), "#wrapperLink");
 		assertThat(elements, notNullValue());
 		assertThat(elements.size(), greaterThan(0));
-		err.println(
-				String.format("Located %d #wrapperLink elements:", elements.size()));
+		err.println(String.format("Found %d elements: ", elements.size()));
 		elements.stream()
 				.map(o -> String.format("outerHTML: %s", o.getAttribute("outerHTML")))
 				.forEach(err::println);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() {
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void tearDownAll() {
 		driver.close();
 	}
 
-	// Utilities
-	public static String getOSName() {
-		if (osName == null) {
-			osName = System.getProperty("os.name").toLowerCase();
-			if (osName.startsWith("windows")) {
-				osName = "windows";
-			}
-		}
-		return osName;
-	}
-
-	// origin:
-	// https://github.com/TsvetomirSlavov/wdci/blob/master/code/src/main/java/com/seleniumsimplified/webdriver/manager/EnvironmentPropertyReader.java
 	public static String getPropertyEnv(String name, String defaultValue) {
 		String value = System.getProperty(name);
 		if (value == null) {
