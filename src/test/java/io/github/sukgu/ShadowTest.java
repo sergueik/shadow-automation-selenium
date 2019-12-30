@@ -26,14 +26,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 // https://www.baeldung.com/junit-before-beforeclass-beforeeach-beforeall
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
-import org.openqa.selenium.JavascriptException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -53,22 +52,23 @@ public class ShadowTest {
 	private static ChromeDriver driver = null;
 	private static Shadow shadow = null;
 	private static String browser = getPropertyEnv("webdriver.driver", "chrome");
-	// NOTE: use -P profile to override
+	// use -P profile to override
 	private static final boolean headless = Boolean
 			.parseBoolean(getPropertyEnv("HEADLESS", "false"));
 
-	@BeforeClass
+	@BeforeAll
 	public static void injectShadowJS() {
 		err.println("Launching " + browser);
 		if (browser.equals("chrome")) {
 			WebDriverManager.chromedriver().setup();
 			driver = new ChromeDriver();
+			driver.navigate().to(baseUrl);
 		} // TODO: finish for other browser
-		driver.navigate().to(baseUrl);
+
 		shadow = new Shadow(driver);
 	}
 
-	@Before
+	@BeforeEach
 	public void init() {
 
 	}
@@ -124,7 +124,7 @@ public class ShadowTest {
 		assertThat(elements.size(), greaterThan(0));
 	}
 
-	@Ignore
+	@Disabled("Disabled until getSiblingElements javascript error: object.siblings is not a function is addressed")
 	@Test
 	public void testAPICalls3() {
 		WebElement element = shadow.findElement(urlLocator);
@@ -133,7 +133,7 @@ public class ShadowTest {
 		assertThat(elements.size(), greaterThan(0));
 	}
 
-	@Ignore
+	@Disabled("Disabled until getChildElements javascript error: Illegal invocation is addressed")
 	@Test
 	public void testAPICalls4() {
 		WebElement element = shadow.findElement(urlLocator);
@@ -154,22 +154,20 @@ public class ShadowTest {
 				.forEach(err::println);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() {
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void tearDownAll() {
 		driver.close();
 	}
 
-	// origin:
-	// https://github.com/TsvetomirSlavov/wdci/blob/master/code/src/main/java/com/seleniumsimplified/webdriver/manager/EnvironmentPropertyReader.java
 	public static String getPropertyEnv(String name, String defaultValue) {
 		String value = System.getProperty(name);
-		if (value == null || value.length() == 0) {
+		if (value == null) {
 			value = System.getenv(name);
-			if (value == null || value.length() == 0) {
+			if (value == null) {
 				value = defaultValue;
 			}
 		}
@@ -177,4 +175,3 @@ public class ShadowTest {
 	}
 
 }
-

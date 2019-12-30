@@ -3,39 +3,20 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.github.sukgu</groupId>
   <artifactId>automation</artifactId>
-  <version>0.0.12</version>
+  <version>0.0.13-SNAPSHOT</version>
   <name>automation</name>
   <description>This project automates shadow-dom elements using java selenium</description>
   <url>http://maven.apache.org</url>
-  <licenses>
-    <license>
-      <name>The Apache License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-    </license>
-  </licenses>
-  <developers>
-    <developer>
-      <name>Sushil Gupta</name>
-      <email>sushil106768@gmail.com</email>
-      <organization>Individual</organization>
-      <organizationUrl>https://www.github.com/sukgu</organizationUrl>
-    </developer>
-  </developers>
-  <scm>
-    <connection>scm:git:git://github.com/sukgu/shadow-automation-selenium.git</connection>
-    <developerConnection>scm:git:git@github.com:sukgu/shadow-automation-selenium.git</developerConnection>
-    <url>https://github.com/sukgu/shadow-automation-selenium</url>
-  </scm>
   <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <hamcrest-all.version>1.3</hamcrest-all.version>
     <java.version>1.8</java.version>
-    <junit.version>4.12</junit.version>
-    <maven-compiler-plugin.version>3.6.0</maven-compiler-plugin.version>
+    <junit-jupiter.version>5.3.2</junit-jupiter.version>
+    <junit-platform-launcher.version>1.4.0</junit-platform-launcher.version>
     <maven-surefire-plugin.version>2.22.0</maven-surefire-plugin.version>
     <maven.compiler.target>${java.version}</maven.compiler.target>
     <maven.compiler.source>${java.version}</maven.compiler.source>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <selenium.version>3.13.0</selenium.version>
     <selenium-chrome-driver.version>${selenium.version}</selenium-chrome-driver.version>
     <selenium-firefox-driver.version>${selenium.version}</selenium-firefox-driver.version>
@@ -43,15 +24,34 @@
   </properties>
   <dependencies>
     <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <version>${junit-jupiter.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <version>${junit-jupiter.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.platform</groupId>
+      <artifactId>junit-platform-launcher</artifactId>
+      <version>${junit-platform-launcher.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.vintage</groupId>
+      <artifactId>junit-vintage-engine</artifactId>
+      <version>${junit-jupiter.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.hamcrest</groupId>
       <artifactId>hamcrest-all</artifactId>
       <version>${hamcrest-all.version}</version>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>${junit.version}</version>
     </dependency>
     <dependency>
       <groupId>org.seleniumhq.selenium</groupId>
@@ -96,77 +96,18 @@
       </exclusions>
     </dependency>
   </dependencies>
-  <distributionManagement>
-    <snapshotRepository>
-      <id>ossrh</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-    </snapshotRepository>
-    <repository>
-      <id>ossrh</id>
-      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-    </repository>
-  </distributionManagement>
   <build>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>${maven-compiler-plugin.version}</version>
-        <goals>
-          <goal>compile</goal>
-        </goals>
-        <configuration>
-          <source>${java.version}</source>
-          <target>${java.version}</target>
-          <encoding>${project.build.sourceEncoding}</encoding>
-          <compilerArgument>-Xlint:all</compilerArgument>
-          <compilerArgument>-Xlint:-processing</compilerArgument>
-          <showWarnings>true</showWarnings>
-          <showDeprecation>true</showDeprecation>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>${maven-surefire-plugin.version}</version>
-        <configuration>
-          <trimStackTrace>false</trimStackTrace>
-          <encoding>${project.build.sourceEncoding}</encoding>
-          <!--
-	  NOTE: specifying the suite XML file prevents surefile from scannint all tests casses and execute everything with the method name mask match
-          <suiteXmlFiles>
-            <suiteXmlFile>src/test/resources/suites/testng.xml</suiteXmlFile>
-	  </suiteXmlFiles>
-	  -->
-          <!-- For parallel runs with e.g. Vagrant https://github.com/sergueik/selenium-fluxbox
-	  <argLine>-Dfile.encoding=${project.build.sourceEncoding} -Dparallel=tests -DthreadCount=2 </argLine>
-	  -->
-          <argLine>-Dfile.encoding=${project.build.sourceEncoding}</argLine>
-          <!-- Skip the default running of this plug-in (or everything is run twice...see below) -->
-          <skip>true</skip>
-        </configuration>
-        <executions>
-          <execution>
-            <id>unit-tests</id>
-            <phase>test</phase>
-            <goals>
-              <goal>test</goal>
-            </goals>
-            <configuration>
-              <skip>false</skip>
-              <systemPropertyVariables>
-                <webdriver.driver>${browser.name}</webdriver.driver>
-                <selenium.version>${selenium.version}</selenium.version>
-                <property.filepath>${property.filepath}</property.filepath>
-              </systemPropertyVariables>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
+    <!-- upstream non standard layout -->
     <resources>
       <resource>
-        <directory>${basedir}/src/main/resources</directory>
+        <directory>${basedir}/resources</directory>
         <includes>
           <include>querySelector.js</include>
         </includes>
@@ -174,4 +115,3 @@
     </resources>
   </build>
 </project>
-
