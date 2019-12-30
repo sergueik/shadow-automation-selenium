@@ -32,7 +32,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
-
+import org.openqa.selenium.JavascriptException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -183,6 +183,32 @@ public class ShadowTest {
 		assertThat(elements, notNullValue());
 		assertThat(elements.size(), greaterThan(0));
 
+	}
+
+	@Test
+	public void testAPICalls41() {
+		WebElement element = shadow.findElement(urlLocator);
+		List<WebElement> elements = shadow.getAllShadowElement(element,
+				"#wrapperLink");
+		assertThat(elements, notNullValue());
+		assertThat(elements.size(), greaterThan(0));
+		err.println(
+				String.format("Located %d #wrapperLink elements:", elements.size()));
+		elements.stream()
+				.map(o -> String.format("outerHTML: %s", o.getAttribute("outerHTML")))
+				.forEach(err::println);
+		element = elements.get(0);
+		elements.clear();
+		try {
+			elements = shadow.getAllShadowElement(element, "span");
+			assertThat(elements, notNullValue());
+			assertThat(elements.size(), greaterThan(0));
+			err.println(String.format("Located %d child elements", elements.size()));
+		} catch (JavascriptException e) {
+			err.println("Exception (ignored): " + e.toString());
+			// TODO:
+			// javascript error: Cannot read property 'querySelectorAll' of null
+		}
 	}
 
 	@Test
