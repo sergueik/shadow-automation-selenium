@@ -23,7 +23,8 @@ before_script:
   - PLATFORM=linux64
   - URL="http://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_${PLATFORM}.zip"
   - echo wget -O $PACKAGE_ARCHIVE -nv $URL
-  - wget -O $PACKAGE_ARCHIVE -nv $URL
+  - wget -O $PACKAGE_ARCHIVE $URL
+  - sleep 120
   - unzip -o "~/Downloads/${PACKAGE_ARCHIVE}"
   - echo Installed Chrome Driver version `./chromedriver --version| head -1 | cut -f 2 -d ' '`
   - sleep 3
