@@ -1,11 +1,10 @@
 language: java
-jdk: oraclejdk8
+jdk: openjdk8
 sudo: false
 dist: trusty
 services:
   - xvfb
 
-# install: true
 addons:
   chrome: stable
   apt:
@@ -15,18 +14,6 @@ before_script:
   - "export DISPLAY=:99.0"
   - "export TRAVIS=true"
   - "sh -e /etc/init.d/xvfb start"
-  - CHROMEDRIVER_VERSION=`curl -s "http://chromedriver.storage.googleapis.com/LATEST_RELEASE"`
-  - echo Download Chromedriver $CHROMEDRIVER_VERSION
-  - mkdir -p ~/Downloads 
-  - cd ~/Downloads
-  - PACKAGE_ARCHIVE=chromedriver_linux64.zip
-  - PLATFORM=linux64
-  - URL="http://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_${PLATFORM}.zip"
-  - echo wget -O $PACKAGE_ARCHIVE -nv $URL
-  - wget -O $PACKAGE_ARCHIVE $URL
-  - sleep 120
-  - unzip -o "~/Downloads/${PACKAGE_ARCHIVE}"
-  - echo Installed Chrome Driver version `./chromedriver --version| head -1 | cut -f 2 -d ' '`
   - sleep 3
 
 script: mvn test
@@ -37,3 +24,4 @@ after_script:
 cache:
   directories:
   - $HOME/.m2
+
