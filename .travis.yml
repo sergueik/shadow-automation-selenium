@@ -15,6 +15,16 @@ before_script:
   - "export DISPLAY=:99.0"
   - "export TRAVIS=true"
   - "sh -e /etc/init.d/xvfb start"
+  - echo Download latest Chromedriver $(curl -s "http://chromedriver.storage.googleapis.com/LATEST_RELEASE")
+  - mkdir -p ~/Downloads 
+  - cd ~/Downloads
+  - CHROMEDRIVER_VERSION=$(curl -s "http://chromedriver.storage.googleapis.com/LATEST_RELEASE")
+  - PACKAGE_ARCHIVE='chromedriver_linux64.zip'
+  - PLATFORM=linux64
+  - URL="http://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_${PLATFORM}.zip"
+  - wget -O $PACKAGE_ARCHIVE -nv $URL
+  - unzip -o "~/Downloads/${PACKAGE_ARCHIVE}"
+  - echo Installed Chrome Driver version $(./chromedriver --version| head -1 | cut -f 2 -d ' ')
   - sleep 3
 
 script: mvn test
