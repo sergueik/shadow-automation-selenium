@@ -114,4 +114,27 @@
       </resource>
     </resources>
   </build>
+  <profiles>
+    <profile>
+      <id>chrome</id>
+      <properties>
+        <browser.name>chrome</browser.name>
+      </properties>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+    </profile>
+    <profile>
+      <id>edge</id>
+      <properties>
+        <browser.name>edge</browser.name>
+      </properties>
+    </profile>
+    <profile>
+      <id>firefox</id>
+      <properties>
+        <browser.name>firefox</browser.name>
+      </properties>
+    </profile>
+  </profiles>
 </project>
