@@ -107,8 +107,6 @@
             <configuration>
               <systemPropertyVariables>
                 <webdriver.driver>${browser.name}</webdriver.driver>
-                <selenium.version>${selenium.version}</selenium.version>
-                <property.filepath>${property.filepath}</property.filepath>
               </systemPropertyVariables>
             </configuration>
           </execution>

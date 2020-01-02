@@ -59,7 +59,7 @@ public class ShadowTest {
 
 	private static WebDriver driver = null;
 	private static Shadow shadow = null;
-	private static String browser = getPropertyEnv("webdriver.driver", "chrome");
+	private static String browser = getPropertyEnv("PROFILE", getPropertyEnv("webdriver.driver", "chrome"));
 	// use -P profile to override
 	private static final boolean headless = Boolean
 			.parseBoolean(getPropertyEnv("HEADLESS", "false"));
