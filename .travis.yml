@@ -13,8 +13,8 @@ addons:
     packages:
       - xvfb
 env:
-  - PROFILE=chrome
-  - PROFILE=firefox
+  - BROWSER=chrome
+  - BROWSER=firefox
 
 before_script:
   - 'export DISPLAY=:99.0'
@@ -24,7 +24,7 @@ before_script:
   - 'sh -e /etc/init.d/xvfb start'
   - sleep 3
 
-script: "mvn -P${PROFILE} test"
+script: "mvn -P${BROWSER} test"
 
 after_script:
   - "sh -e /etc/init.d/xvfb stop"

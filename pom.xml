@@ -102,6 +102,15 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>${maven-surefire-plugin.version}</version>
+        <executions>
+          <execution>
+            <configuration>
+              <systemPropertyVariables>
+                <webdriver.driver>${browser.name}</webdriver.driver>
+              </systemPropertyVariables>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
     <!-- upstream non standard layout -->
