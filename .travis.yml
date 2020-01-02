@@ -17,9 +17,11 @@ env:
   - PROFILE=firefox
 
 before_script:
-  - "export DISPLAY=:99.0"
-  - "export TRAVIS=true"
-  - "sh -e /etc/init.d/xvfb start"
+  - 'export DISPLAY=:99.0'
+  # TODO: multiple displays ?
+  - 'export TRAVIS=true'
+  - 'export DEBUG=true'
+  - 'sh -e /etc/init.d/xvfb start'
   - sleep 3
 
 script: "mvn -P${PROFILE} test"
@@ -30,4 +32,8 @@ after_script:
 cache:
   directories:
   - $HOME/.m2
+
+# https://stackoverflow.com/questions/21053657/how-to-run-travis-ci-locally
+# https://stackoverflow.com/questions/21053657/how-to-run-travis-ci-locally/49019950#49019950
+# https://gist.github.com/fulldecent/d84cd1abdcc6930865d1b862c4aed917
 

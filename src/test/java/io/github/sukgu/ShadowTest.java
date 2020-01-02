@@ -52,15 +52,17 @@ public class ShadowTest {
 	private final static String baseUrl = "https://www.virustotal.com";
 	// private static final String urlLocator = "a[data-route='url']";
 	private static final String urlLocator = "*[data-route='url']";
-	private boolean debug = Boolean
+	private static final boolean debug = Boolean
 			.parseBoolean(getPropertyEnv("DEBUG", "false"));;
 	private static Map<String, String> env = System.getenv();
 	private static boolean isCIBuild = checkEnvironment();
 
 	private static WebDriver driver = null;
 	private static Shadow shadow = null;
-	private static String browser = getPropertyEnv("webdriver.driver", "chrome");
-	// use -P profile to override
+	private static String browser = getPropertyEnv("BROWSER",
+			getPropertyEnv("webdriver.driver", "chrome"));
+	// export BROWSER=firefox or
+	// use -Pfirefox to override
 	private static final boolean headless = Boolean
 			.parseBoolean(getPropertyEnv("HEADLESS", "false"));
 
@@ -176,10 +178,19 @@ public class ShadowTest {
 
 	public static String getPropertyEnv(String name, String defaultValue) {
 		String value = System.getProperty(name);
+		if (debug) {
+			err.println("system property " + name + " = " + value);
+		}
 		if (value == null || value.length() == 0) {
 			value = System.getenv(name);
+			if (debug) {
+				err.println("system env " + name + " = " + value);
+			}
 			if (value == null || value.length() == 0) {
 				value = defaultValue;
+				if (debug) {
+					err.println("default value  = " + value);
+				}
 			}
 		}
 		return value;
