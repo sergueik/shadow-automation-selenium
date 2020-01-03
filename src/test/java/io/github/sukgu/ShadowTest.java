@@ -1,28 +1,12 @@
 package io.github.sukgu;
 
 import static java.lang.System.err;
-import static java.lang.System.out;
-
-import java.io.File;
-import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 // https://www.baeldung.com/junit-before-beforeclass-beforeeach-beforeall
@@ -32,19 +16,11 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-
-import org.openqa.selenium.ElementNotVisibleException;
-import org.openqa.selenium.JavascriptException;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebDriverException;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.firefox.FirefoxProfile;
-import org.openqa.selenium.remote.DesiredCapabilities;
 
-import io.github.sukgu.Shadow;
 import io.github.bonigarcia.wdm.WebDriverManager;
 
 public class ShadowTest {
@@ -54,7 +30,7 @@ public class ShadowTest {
 	private static final String urlLocator = "*[data-route='url']";
 	private static final boolean debug = Boolean
 			.parseBoolean(getPropertyEnv("DEBUG", "false"));;
-	private static Map<String, String> env = System.getenv();
+
 	private static boolean isCIBuild = checkEnvironment();
 
 	private static WebDriver driver = null;
@@ -63,6 +39,7 @@ public class ShadowTest {
 			getPropertyEnv("webdriver.driver", "chrome"));
 	// export BROWSER=firefox or
 	// use -Pfirefox to override
+	@SuppressWarnings("unused")
 	private static final boolean headless = Boolean
 			.parseBoolean(getPropertyEnv("HEADLESS", "false"));
 
@@ -197,6 +174,7 @@ public class ShadowTest {
 	}
 
 	public static boolean checkEnvironment() {
+		Map<String, String> env = System.getenv();
 		boolean result = false;
 		if (env.containsKey("TRAVIS") && env.get("TRAVIS").equals("true")) {
 			result = true;
