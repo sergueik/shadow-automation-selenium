@@ -27,7 +27,6 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 
-import example.SettingsTest.BrowserChecker;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import io.github.sukgu.Shadow;
 
