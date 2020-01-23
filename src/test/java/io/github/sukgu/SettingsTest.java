@@ -27,6 +27,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 
+import example.SettingsTest.BrowserChecker;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import io.github.sukgu.Shadow;
 
@@ -48,17 +49,11 @@ public class SettingsTest {
 	private static Shadow shadow = null;
 	private static String browser = getPropertyEnv("BROWSER",
 			getPropertyEnv("webdriver.driver", "chrome"));
+
 	private static final BrowserChecker browserChecker = new BrowserChecker(
-			getBrowser());
-
+			browser);
 	// export BROWSER=firefox or
 	// use -Pfirefox to override
-
-	// export BROWSER=firefox or
-	// use -Pfirefox to override
-	public static String getBrowser() {
-		return browser;
-	}
 
 	@SuppressWarnings("unused")
 	private static final boolean headless = Boolean
@@ -90,7 +85,7 @@ public class SettingsTest {
 	// org.openqa.selenium.JavascriptException: javascript error: missing ) after
 	// argument list
 	public void testGetAllObject() {
-		Assumptions.assumeTrue(getBrowser().equals("chrome"));
+		Assumptions.assumeTrue(browser.equals("chrome"));
 		driver.navigate().to(baseUrl);
 		List<WebElement> elements = shadow.findElements(urlLocator);
 		assertThat(elements, notNullValue());
