@@ -81,8 +81,6 @@ public class SettingsTest {
 
 	// @Ignore
 	@Test
-	// org.openqa.selenium.JavascriptException: javascript error: missing ) after
-	// argument list
 	public void testGetAllObject() {
 		Assumptions.assumeTrue(browser.equals("chrome"));
 		driver.navigate().to(baseUrl);
@@ -102,9 +100,10 @@ public class SettingsTest {
 				.forEach(err::println);
 	}
 
+	// TODO: deal with AssumptionViolatedException in junit 5 ?
 	@Test
 	public void testAPICalls5() {
-		Assume.assumeTrue(browserChecker.testingChrome());
+		Assumptions.assumeTrue(browserChecker.testingChrome());
 		driver.navigate().to(baseUrl);
 		WebElement element = shadow.findElement(urlLocator);
 		err.println(
