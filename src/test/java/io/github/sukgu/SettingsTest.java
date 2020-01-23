@@ -9,15 +9,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.junit.Assume;
 import org.junit.Ignore;
 
 // https://www.baeldung.com/junit-before-beforeclass-beforeeach-beforeall
+
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -26,6 +30,7 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import io.github.sukgu.Shadow;
 
+// TODO: skip when run with firefox browser
 public class SettingsTest {
 
 	private final static String baseUrl = "chrome://settings/";
@@ -43,14 +48,25 @@ public class SettingsTest {
 	private static Shadow shadow = null;
 	private static String browser = getPropertyEnv("BROWSER",
 			getPropertyEnv("webdriver.driver", "chrome"));
+	private static final BrowserChecker browserChecker = new BrowserChecker(
+			getBrowser());
+
 	// export BROWSER=firefox or
 	// use -Pfirefox to override
+
+	// export BROWSER=firefox or
+	// use -Pfirefox to override
+	public static String getBrowser() {
+		return browser;
+	}
+
 	@SuppressWarnings("unused")
 	private static final boolean headless = Boolean
 			.parseBoolean(getPropertyEnv("HEADLESS", "false"));
 
 	@BeforeAll
 	public static void injectShadowJS() {
+
 		err.println("Launching " + browser);
 		if (browser.equals("chrome")) {
 			WebDriverManager.chromedriver().setup();
@@ -75,6 +91,7 @@ public class SettingsTest {
 	// org.openqa.selenium.JavascriptException: javascript error: missing ) after
 	// argument list
 	public void testGetAllObject() {
+		Assumptions.assumeTrue(getBrowser().equals("chrome"));
 		List<WebElement> elements = shadow.findElements(urlLocator);
 		assertThat(elements, notNullValue());
 		assertThat(elements.size(), greaterThan(0));
@@ -93,6 +110,7 @@ public class SettingsTest {
 
 	@Test
 	public void testAPICalls5() {
+		Assume.assumeTrue(browserChecker.testingChrome());
 		WebElement element = shadow.findElement(urlLocator);
 		err.println(
 				String.format("outerHTML: %s", element.getAttribute("outerHTML")));
@@ -143,4 +161,17 @@ public class SettingsTest {
 		return result;
 	}
 
+	// origin: https://reflectoring.io/conditional-junit4-junit5-tests/
+	// probably an overkill
+	public static class BrowserChecker {
+		private String browser;
+
+		public BrowserChecker(String browser) {
+			this.browser = browser;
+		}
+
+		public boolean testingChrome() {
+			return (this.browser.equals("chrome"));
+		}
+	}
 }
