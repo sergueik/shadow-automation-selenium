@@ -76,14 +76,13 @@ public class SettingsTest {
 			WebDriverManager.firefoxdriver().setup();
 			driver = new FirefoxDriver();
 		} // TODO: finish for other browsers
-		driver.navigate().to(baseUrl);
 		shadow = new Shadow(driver);
 		shadow.setDebug(debug);
 	}
 
 	@BeforeEach
 	public void init() {
-
+		driver.navigate().to("about:blank");
 	}
 
 	// @Ignore
@@ -92,6 +91,7 @@ public class SettingsTest {
 	// argument list
 	public void testGetAllObject() {
 		Assumptions.assumeTrue(getBrowser().equals("chrome"));
+		driver.navigate().to(baseUrl);
 		List<WebElement> elements = shadow.findElements(urlLocator);
 		assertThat(elements, notNullValue());
 		assertThat(elements.size(), greaterThan(0));
@@ -111,6 +111,7 @@ public class SettingsTest {
 	@Test
 	public void testAPICalls5() {
 		Assume.assumeTrue(browserChecker.testingChrome());
+		driver.navigate().to(baseUrl);
 		WebElement element = shadow.findElement(urlLocator);
 		err.println(
 				String.format("outerHTML: %s", element.getAttribute("outerHTML")));
