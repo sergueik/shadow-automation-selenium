@@ -42,12 +42,26 @@ var getChildElements = function getChildElements(object) {
 };
 
 var getSiblingElements = function getSiblingElements(object) {
-	if(object.nodeName=="#document-fragment") {
-		return object.host.children;
-	} else {
-		return object.siblings();
-	}
+    if (object.nodeName == "#document-fragment") {
+        return object.host.children;
+    } else {
+        /* object.siblings() is not available in vanilla JS */
+        return getAllSibling(object, null);
+    }
 };
+
+
+/*  based on: https://stackoverflow.com/questions/4378784/how-to-find-all-siblings-of-currently-selected-object */
+var getAllSibling = function getAllSibling(element, filter) {
+    var siblings = [];
+    element = element.parentNode.firstChild;
+    do {
+        if (element.nodeType === 3) continue; /* text  node */
+        if (!filter || filter(element)) siblings.push(element);
+    } while (element = siblings.nextSibling);
+    return siblings;
+};
+
 
 var getSiblingElement = function getSiblingElement(object, selector) {
 	if(object.nodeName=="#document-fragment") {

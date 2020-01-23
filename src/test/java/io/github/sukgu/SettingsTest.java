@@ -29,21 +29,25 @@ import io.github.sukgu.Shadow;
 public class SettingsTest {
 
 	private final static String baseUrl = "chrome://settings/";
-// 	private static final String urlLocator = "#basicPage > settings-section[page-title='Search engine']";
+	// private static final String urlLocator = "#basicPage >
+	// settings-section[page-title='Search engine']";
 	// TODO: sanitize on the fly
 	private static final String urlLocator = "#basicPage > settings-section[page-title=\"Search engine\"]";
 	private static final String shadowLocator = "#card";
-	private static final boolean debug = Boolean.parseBoolean(getPropertyEnv("DEBUG", "false"));;
+	private static final boolean debug = Boolean
+			.parseBoolean(getPropertyEnv("DEBUG", "false"));;
 
 	private static boolean isCIBuild = checkEnvironment();
 
 	private static WebDriver driver = null;
 	private static Shadow shadow = null;
-	private static String browser = getPropertyEnv("BROWSER", getPropertyEnv("webdriver.driver", "chrome"));
+	private static String browser = getPropertyEnv("BROWSER",
+			getPropertyEnv("webdriver.driver", "chrome"));
 	// export BROWSER=firefox or
 	// use -Pfirefox to override
 	@SuppressWarnings("unused")
-	private static final boolean headless = Boolean.parseBoolean(getPropertyEnv("HEADLESS", "false"));
+	private static final boolean headless = Boolean
+			.parseBoolean(getPropertyEnv("HEADLESS", "false"));
 
 	@BeforeAll
 	public static void injectShadowJS() {
@@ -58,7 +62,7 @@ public class SettingsTest {
 		} // TODO: finish for other browsers
 		driver.navigate().to(baseUrl);
 		shadow = new Shadow(driver);
-		shadow.setDebug(true);
+		shadow.setDebug(debug);
 	}
 
 	@BeforeEach
@@ -74,23 +78,31 @@ public class SettingsTest {
 		List<WebElement> elements = shadow.findElements(urlLocator);
 		assertThat(elements, notNullValue());
 		assertThat(elements.size(), greaterThan(0));
-		err.println(String.format("Located %d %s elements:", elements.size(), urlLocator));
-		//	 NOTE: default toString() is not be particularly useful
+		err.println(
+				String.format("Located %d %s elements:", elements.size(), urlLocator));
+		// NOTE: default toString() is not be particularly useful
 		elements.stream().forEach(err::println);
 		elements.stream().map(o -> o.getTagName()).forEach(err::println);
-		elements.stream().map(o -> String.format("innerHTML: %s", o.getAttribute("innerHTML"))).forEach(err::println);
-		elements.stream().map(o -> String.format("outerHTML: %s", o.getAttribute("outerHTML"))).forEach(err::println);
+		elements.stream()
+				.map(o -> String.format("innerHTML: %s", o.getAttribute("innerHTML")))
+				.forEach(err::println);
+		elements.stream()
+				.map(o -> String.format("outerHTML: %s", o.getAttribute("outerHTML")))
+				.forEach(err::println);
 	}
 
 	@Test
 	public void testAPICalls5() {
 		WebElement element = shadow.findElement(urlLocator);
-		err.println(String.format("outerHTML: %s", element.getAttribute("outerHTML")));
+		err.println(
+				String.format("outerHTML: %s", element.getAttribute("outerHTML")));
 		List<WebElement> elements = shadow.findElements(element, shadowLocator);
 		assertThat(elements, notNullValue());
 		assertThat(elements.size(), greaterThan(0));
 		err.println(String.format("Found %d elements: ", elements.size()));
-		elements.stream().map(o -> String.format("outerHTML: %s", o.getAttribute("outerHTML"))).forEach(err::println);
+		elements.stream()
+				.map(o -> String.format("outerHTML: %s", o.getAttribute("outerHTML")))
+				.forEach(err::println);
 	}
 
 	@AfterEach

@@ -28,6 +28,11 @@ import org.openqa.selenium.JavascriptException;
 public class Shadow {
 
 	WebDriver driver;
+
+	public RemoteWebDriver getDriver() {
+		return (RemoteWebDriver) this.driver;
+	}
+
 	WebDriverException exception;
 	WebDriverWait wait;
 	CommandExecutor executer;
@@ -153,14 +158,18 @@ public class Shadow {
 		return text;
 	}
 
-	private void fixLocator(SearchContext context, String cssLocator, WebElement element) {
+	private void fixLocator(SearchContext context, String cssLocator,
+			WebElement element) {
 		if (element instanceof RemoteWebElement) {
 			try {
 				@SuppressWarnings("rawtypes")
-				Class[] parameterTypes = new Class[] { SearchContext.class, String.class, String.class };
-				Method m = element.getClass().getDeclaredMethod("setFoundBy", parameterTypes);
+				Class[] parameterTypes = new Class[] { SearchContext.class,
+						String.class, String.class };
+				Method m = element.getClass().getDeclaredMethod("setFoundBy",
+						parameterTypes);
 				m.setAccessible(true);
-				Object[] parameters = new Object[] { context, "cssSelector", cssLocator };
+				Object[] parameters = new Object[] { context, "cssSelector",
+						cssLocator };
 				m.invoke(element, parameters);
 			} catch (Exception fail) {
 				// fail("Something bad happened when fixing locator");
@@ -171,7 +180,8 @@ public class Shadow {
 	private void waitForPageLoaded() {
 		ExpectedCondition<Boolean> expectation = new ExpectedCondition<Boolean>() {
 			public Boolean apply(WebDriver driver) {
-				return ((JavascriptExecutor) driver).executeScript("return document.readyState").toString()
+				return ((JavascriptExecutor) driver)
+						.executeScript("return document.readyState").toString()
 						.equals("complete");
 			}
 		};
@@ -200,7 +210,8 @@ public class Shadow {
 	private boolean isPresent(WebElement element) {
 		boolean present = false;
 		try {
-			present = (Boolean) executerGetObject("return isVisible(arguments[0]);", element);
+			present = (Boolean) executerGetObject("return isVisible(arguments[0]);",
+					element);
 		} catch (JavascriptException ex) {
 
 		}
@@ -217,15 +228,15 @@ public class Shadow {
 			} catch (InterruptedException e) {
 
 			}
-			element = (WebElement) executerGetObject(
-					String.format("return getObject(\"%s\");", cssSelector.replaceAll("\"", "\\\\\"")));
+			element = (WebElement) executerGetObject(String.format(
+					"return getObject(\"%s\");", cssSelector.replaceAll("\"", "\\\\\"")));
 			fixLocator(driver, cssSelector, element);
 			visible = isPresent(element);
 		}
 
 		if (explicitWait > 0) {
-			element = (WebElement) executerGetObject(
-					String.format("return getObject(\"%s\");", cssSelector.replaceAll("\"", "\\\\\"")));
+			element = (WebElement) executerGetObject(String.format(
+					"return getObject(\"%s\");", cssSelector.replaceAll("\"", "\\\\\"")));
 			fixLocator(driver, cssSelector, element);
 			visible = isPresent(element);
 
@@ -233,7 +244,8 @@ public class Shadow {
 				try {
 					Thread.sleep(pollingTime * 1000);
 					element = (WebElement) executerGetObject(
-							String.format("return getObject(\"%s\");", cssSelector.replaceAll("\"", "\\\\\"")));
+							String.format("return getObject(\"%s\");",
+									cssSelector.replaceAll("\"", "\\\\\"")));
 					fixLocator(driver, cssSelector, element);
 					visible = isPresent(element);
 					i = i + pollingTime;
@@ -244,13 +256,14 @@ public class Shadow {
 		}
 
 		if (explicitWait == 0 && implicitWait == 0) {
-			element = (WebElement) executerGetObject(
-					String.format("return getObject(\"%s\");", cssSelector.replaceAll("\"", "\\\\\"")));
+			element = (WebElement) executerGetObject(String.format(
+					"return getObject(\"%s\");", cssSelector.replaceAll("\"", "\\\\\"")));
 			fixLocator(driver, cssSelector, element);
 		}
 
 		if (!isPresent(element)) {
-			throw new ElementNotVisibleException("Element with CSS " + cssSelector + " is not present on screen");
+			throw new ElementNotVisibleException(
+					"Element with CSS " + cssSelector + " is not present on screen");
 		}
 
 		return element;
@@ -268,7 +281,8 @@ public class Shadow {
 
 			}
 			element = (WebElement) executerGetObject(
-					String.format("return getObject(\"%s\", arguments[0]);", cssSelector.replaceAll("\"", "\\\\\"")),
+					String.format("return getObject(\"%s\", arguments[0]);",
+							cssSelector.replaceAll("\"", "\\\\\"")),
 					parent);
 
 			fixLocator(driver, cssSelector, element);
@@ -277,7 +291,8 @@ public class Shadow {
 
 		if (explicitWait > 0) {
 			element = (WebElement) executerGetObject(
-					String.format("return getObject(\"%s\", arguments[0]);", cssSelector.replaceAll("\"", "\\\\\"")),
+					String.format("return getObject(\"%s\", arguments[0]);",
+							cssSelector.replaceAll("\"", "\\\\\"")),
 					parent);
 			fixLocator(driver, cssSelector, element);
 			visible = isPresent(element);
@@ -285,8 +300,10 @@ public class Shadow {
 			for (int i = 0; i < explicitWait && !visible;) {
 				try {
 					Thread.sleep(pollingTime * 1000);
-					element = (WebElement) executerGetObject(String.format("return getObject(\"%s\", arguments[0]);",
-							cssSelector.replaceAll("\"", "\\\\\"")), parent);
+					element = (WebElement) executerGetObject(
+							String.format("return getObject(\"%s\", arguments[0]);",
+									cssSelector.replaceAll("\"", "\\\\\"")),
+							parent);
 					fixLocator(driver, cssSelector, element);
 					visible = isPresent(element);
 					i = i + pollingTime;
@@ -299,13 +316,15 @@ public class Shadow {
 
 		if (explicitWait == 0 && implicitWait == 0) {
 			element = (WebElement) executerGetObject(
-					String.format("return getObject(\"%s\", arguments[0]);", cssSelector.replaceAll("\"", "\\\\\"")),
+					String.format("return getObject(\"%s\", arguments[0]);",
+							cssSelector.replaceAll("\"", "\\\\\"")),
 					parent);
 			fixLocator(driver, cssSelector, element);
 		}
 
 		if (!isPresent(element)) {
-			throw new ElementNotVisibleException("Element with CSS " + cssSelector + " is not present on screen");
+			throw new ElementNotVisibleException(
+					"Element with CSS " + cssSelector + " is not present on screen");
 		}
 
 		return element;
@@ -322,7 +341,8 @@ public class Shadow {
 		}
 		List<WebElement> element = null;
 		Object object = executerGetObject(
-				String.format("return getAllObject(\"%s\");", cssSelector.replaceAll("\"", "\\\\\"")));
+				String.format("return getAllObject(\"%s\");",
+						cssSelector.replaceAll("\"", "\\\\\"")));
 		if (object != null && object instanceof List<?>) {
 			element = (List<WebElement>) object;
 		}
@@ -343,7 +363,8 @@ public class Shadow {
 		}
 		List<WebElement> element = null;
 		Object object = executerGetObject(
-				String.format("return getAllObject(\"%s\", arguments[0]);", cssSelector.replaceAll("\"", "\\\\\"")),
+				String.format("return getAllObject(\"%s\", arguments[0]);",
+						cssSelector.replaceAll("\"", "\\\\\"")),
 				parent);
 		if (object != null && object instanceof List<?>) {
 			element = (List<WebElement>) object;
@@ -364,13 +385,16 @@ public class Shadow {
 		}
 		WebElement element = null;
 		element = (WebElement) executerGetObject(
-				String.format("return getShadowElement(arguments[0],\"%s\");", selector), parent);
+				String.format("return getShadowElement(arguments[0],\"%s\");",
+						selector.replaceAll("\"", "\\\\\"")),
+				parent);
 		fixLocator(driver, selector, element);
 		return element;
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<WebElement> getAllShadowElement(WebElement parent, String selector) {
+	public List<WebElement> getAllShadowElement(WebElement parent,
+			String selector) {
 		if (implicitWait > 0) {
 			try {
 				Thread.sleep(implicitWait * 1000);
@@ -379,7 +403,9 @@ public class Shadow {
 			}
 		}
 		List<WebElement> elements = null;
-		Object object = executerGetObject(String.format("return getAllShadowElement(arguments[0],\"%s\");", selector),
+		Object object = executerGetObject(
+				String.format("return getAllShadowElement(arguments[0],\"%s\");",
+						selector.replaceAll("\"", "\\\\\"")),
 				parent);
 		if (object != null && object instanceof List<?>) {
 			elements = (List<WebElement>) object;
@@ -398,7 +424,8 @@ public class Shadow {
 
 			}
 		}
-		return (WebElement) executerGetObject("return getParentElement(arguments[0]);", element);
+		return (WebElement) executerGetObject(
+				"return getParentElement(arguments[0]);", element);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -411,7 +438,8 @@ public class Shadow {
 			}
 		}
 		List<WebElement> elements = null;
-		Object object = executerGetObject("return getChildElements(arguments[0]);", parent);
+		Object object = executerGetObject("return getChildElements(arguments[0]);",
+				parent);
 		if (object != null && object instanceof List<?>) {
 			elements = (List<WebElement>) object;
 		}
@@ -428,7 +456,8 @@ public class Shadow {
 			}
 		}
 		List<WebElement> elements = null;
-		Object object = executerGetObject("return getSiblingElements(arguments[0]);", element);
+		Object object = executerGetObject(
+				"return getSiblingElements(arguments[0]);", element);
 		if (object != null && object instanceof List<?>) {
 			elements = (List<WebElement>) object;
 		}
@@ -443,37 +472,47 @@ public class Shadow {
 
 			}
 		}
-		return (WebElement) executerGetObject(String.format("return getSiblingElement(arguments[0],\"%s\");", selector),
+		return (WebElement) executerGetObject(
+				String.format("return getSiblingElement(arguments[0],\"%s\");",
+						selector.replaceAll("\"", "\\\\\"")),
 				element);
 	}
 
 	public WebElement getNextSiblingElement(WebElement element) {
-		return (WebElement) executerGetObject("return getNextSiblingElement(arguments[0]);", element);
+		return (WebElement) executerGetObject(
+				"return getNextSiblingElement(arguments[0]);", element);
 	}
 
 	public WebElement getPreviousSiblingElement(WebElement element) {
-		return (WebElement) executerGetObject("return getPreviousSiblingElement(arguments[0]);", element);
+		return (WebElement) executerGetObject(
+				"return getPreviousSiblingElement(arguments[0]);", element);
 	}
 
 	public boolean isVisible(WebElement element) {
-		return (Boolean) executerGetObject("return isVisible(arguments[0]);", element);
+		return (Boolean) executerGetObject("return isVisible(arguments[0]);",
+				element);
 	}
 
 	public boolean isChecked(WebElement element) {
-		return (Boolean) executerGetObject("return isChecked(arguments[0]);", element);
+		return (Boolean) executerGetObject("return isChecked(arguments[0]);",
+				element);
 	}
 
 	public boolean isDisabled(WebElement element) {
-		return (Boolean) executerGetObject("return isDisabled(arguments[0]);", element);
+		return (Boolean) executerGetObject("return isDisabled(arguments[0]);",
+				element);
 	}
 
 	public String getAttribute(WebElement element, String attribute) {
-		return (String) executerGetObject(String.format("return getAttribute(arguments[0],\"%s\");", attribute),
+		return (String) executerGetObject(
+				String.format("return getAttribute(arguments[0],\"%s\");", attribute),
 				element);
 	}
 
 	public void selectCheckbox(WebElement parentElement, String label) {
-		executerGetObject(String.format("return selectCheckbox(\"%s\",arguments[0]);", label), parentElement);
+		executerGetObject(
+				String.format("return selectCheckbox(\"%s\",arguments[0]);", label),
+				parentElement);
 	}
 
 	public void selectCheckbox(String label) {
@@ -481,7 +520,9 @@ public class Shadow {
 	}
 
 	public void selectRadio(WebElement parentElement, String label) {
-		executerGetObject(String.format("return selectRadio(\"%s\",arguments[0]);", label), parentElement);
+		executerGetObject(
+				String.format("return selectRadio(\"%s\",arguments[0]);", label),
+				parentElement);
 	}
 
 	public void selectRadio(String label) {
