@@ -34,42 +34,15 @@ import io.github.bonigarcia.wdm.WebDriverManager;
 import io.github.sukgu.Shadow;
 
 // the tests will get skipped when run on Firefox
-public class SettingsTest {
+public class SettingsTest extends BaseTest {
 
 	private final static String baseUrl = "chrome://settings/";
 	private static String urlLocator = null;
 	private static String shadowLocator = null;
 	private static String shadow2Locator = null;
-	private static final boolean debug = Boolean.parseBoolean(getPropertyEnv("DEBUG", "false"));;
 
-	private static boolean isCIBuild = checkEnvironment();
-
-	private static WebDriver driver = null;
-	public Actions actions;
-	private static Shadow shadow = null;
-	private static String browser = getPropertyEnv("BROWSER", getPropertyEnv("webdriver.driver", "chrome"));
-
-	private static final BrowserChecker browserChecker = new BrowserChecker(browser);
+	private static final BrowserChecker browserChecker = new BrowserChecker(getBrowser());
 	// export BROWSER=firefox or specify profile -Pfirefox to override
-
-	@SuppressWarnings("unused")
-	private static final boolean headless = Boolean.parseBoolean(getPropertyEnv("HEADLESS", "false"));
-
-	@BeforeAll
-	public static void injectShadowJS() {
-
-		err.println("Launching " + browser);
-		if (browser.equals("chrome")) {
-			WebDriverManager.chromedriver().setup();
-			driver = new ChromeDriver();
-		}
-		if (browser.equals("firefox")) {
-			WebDriverManager.firefoxdriver().setup();
-			driver = new FirefoxDriver();
-		} // TODO: finish for other browsers
-		shadow = new Shadow(driver);
-		shadow.setDebug(debug);
-	}
 
 	@BeforeEach
 	public void init() {
@@ -81,7 +54,7 @@ public class SettingsTest {
 		urlLocator = "#basicPage > settings-section[page-title=\"Search engine\"]";
 		shadowLocator = "#card";
 
-		Assumptions.assumeTrue(browser.equals("chrome"));
+		Assumptions.assumeTrue(getBrowser().equals("chrome"));
 		driver.navigate().to(baseUrl);
 		List<WebElement> elements = shadow.findElements(urlLocator);
 		assertThat(elements, notNullValue());
@@ -109,7 +82,7 @@ public class SettingsTest {
 		elements.stream().map(o -> String.format("outerHTML: %s", o.getAttribute("outerHTML"))).forEach(err::println);
 	}
 
-	// @Disabled("Disabled until execptions   of element is addressed")
+	// @Disabled("Disabled until execptions of element is addressed")
 	@Test
 	public void test3() {
 		Assumptions.assumeTrue(browserChecker.testingChrome());
@@ -120,65 +93,28 @@ public class SettingsTest {
 		WebElement element = shadow.findElement(urlLocator);
 		err.println(String.format("outerHTML: %s", element.getAttribute("outerHTML")));
 		try {
-			actions = new Actions(driver);
-			actions.moveToElement(element).build().perform();
-			sleep(1000);
-			actions.click().build().perform();
-			sleep(1000);
+			/*
+			 * 
+			 * actions.moveToElement(element).build().perform(); sleep(1000);
+			 * actions.click().build().perform(); sleep(1000);
+			 */
 			element.click();
+			sleep(1000);
 		} catch (ElementClickInterceptedException e) {
+			System.err.println("Exception (ignored): " + e.getMessage());
 			// element click intercepted: Element is not clickable at point
-
 		}
-		sleep(1000);
-		// shadowLocator = "*"; // anything! - does not work either
-		// NOTE: hanging the browser!
+		// shadowLocator = "*";
+		// anything! - does not work either
 		try {
 			WebElement element2 = shadow.findElement(element, shadowLocator);
 			assertThat(element2, notNullValue());
 			WebElement element3 = shadow.findElement(element2, shadow2Locator);
 			assertThat(element3, notNullValue());
 		} catch (ElementNotVisibleException e) {
+			System.err.println("Exception (ignored): " + e.getMessage());
 			// Element with CSS settings-default-browser-page is not present on screen
 		}
-	}
-
-	@AfterEach
-	public void tearDown() {
-	}
-
-	@AfterAll
-	public static void tearDownAll() {
-		driver.close();
-	}
-
-	public static String getPropertyEnv(String name, String defaultValue) {
-		String value = System.getProperty(name);
-		if (debug) {
-			err.println("system property " + name + " = " + value);
-		}
-		if (value == null || value.length() == 0) {
-			value = System.getenv(name);
-			if (debug) {
-				err.println("system env " + name + " = " + value);
-			}
-			if (value == null || value.length() == 0) {
-				value = defaultValue;
-				if (debug) {
-					err.println("default value  = " + value);
-				}
-			}
-		}
-		return value;
-	}
-
-	public static boolean checkEnvironment() {
-		Map<String, String> env = System.getenv();
-		boolean result = false;
-		if (env.containsKey("TRAVIS") && env.get("TRAVIS").equals("true")) {
-			result = true;
-		}
-		return result;
 	}
 
 	// origin: https://reflectoring.io/conditional-junit4-junit5-tests/
@@ -192,14 +128,6 @@ public class SettingsTest {
 
 		public boolean testingChrome() {
 			return (this.browser.equals("chrome"));
-		}
-	}
-
-	public void sleep(Integer milliSeconds) {
-		try {
-			Thread.sleep((long) milliSeconds);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
 		}
 	}
 

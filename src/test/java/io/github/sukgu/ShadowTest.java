@@ -23,42 +23,14 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
 
-public class ShadowTest {
+public class ShadowTest extends BaseTest {
 
 	private final static String baseUrl = "https://www.virustotal.com";
 	private static final String urlLocator = "*[data-route='url']";
-	private static final boolean debug = Boolean
-			.parseBoolean(getPropertyEnv("DEBUG", "false"));;
-
-	private static boolean isCIBuild = checkEnvironment();
-
-	private static WebDriver driver = null;
-	private static Shadow shadow = null;
-	private static String browser = getPropertyEnv("BROWSER",
-			getPropertyEnv("webdriver.driver", "chrome"));
-	// export BROWSER=firefox or specify profile -Pfirefox to override
-	@SuppressWarnings("unused")
-	private static final boolean headless = Boolean
-			.parseBoolean(getPropertyEnv("HEADLESS", "false"));
-
-	@BeforeAll
-	public static void injectShadowJS() {
-		err.println("Launching " + browser);
-		if (browser.equals("chrome")) {
-			WebDriverManager.chromedriver().setup();
-			driver = new ChromeDriver();
-		}
-		if (browser.equals("firefox")) {
-			WebDriverManager.firefoxdriver().setup();
-			driver = new FirefoxDriver();
-		} // TODO: finish for other browsers
-		driver.navigate().to(baseUrl);
-		shadow = new Shadow(driver);
-		shadow.setDebug(debug);
-	}
 
 	@BeforeEach
 	public void init() {
+		driver.navigate().to(baseUrl);
 
 	}
 
@@ -76,22 +48,19 @@ public class ShadowTest {
 		assertThat(elements, notNullValue());
 		assertThat(elements.size(), greaterThan(0));
 		err.println(String.format("Found %d elements:", elements.size()));
-		/* elements.stream().forEach(err::println);
-		 elements.stream().map(o -> o.getTagName()).forEach(err::println);
-		elements.stream()
-				.map(o -> String.format("innerHTML: %s", o.getAttribute("innerHTML")))
-				.forEach(err::println);
-				*/
-		elements.stream()
-				.map(o -> String.format("outerHTML: %s", o.getAttribute("outerHTML")))
-				.forEach(err::println);
+		/*
+		 * elements.stream().forEach(err::println); elements.stream().map(o ->
+		 * o.getTagName()).forEach(err::println); elements.stream() .map(o ->
+		 * String.format("innerHTML: %s", o.getAttribute("innerHTML")))
+		 * .forEach(err::println);
+		 */
+		elements.stream().map(o -> String.format("outerHTML: %s", o.getAttribute("outerHTML"))).forEach(err::println);
 	}
 
 	@Test
 	public void testAPICalls1() {
-		WebElement element = shadow.findElements(urlLocator).stream()
-				.filter(o -> o.getTagName().matches("div")).collect(Collectors.toList())
-				.get(0);
+		WebElement element = shadow.findElements(urlLocator).stream().filter(o -> o.getTagName().matches("div"))
+				.collect(Collectors.toList()).get(0);
 
 		WebElement element1 = shadow.getNextSiblingElement(element);
 		assertThat(element1, notNullValue());
@@ -100,9 +69,8 @@ public class ShadowTest {
 
 	@Test
 	public void testAPICalls2() {
-		WebElement element = shadow.findElements(urlLocator).stream()
-				.filter(o -> o.getTagName().matches("div")).collect(Collectors.toList())
-				.get(0);
+		WebElement element = shadow.findElements(urlLocator).stream().filter(o -> o.getTagName().matches("div"))
+				.collect(Collectors.toList()).get(0);
 		List<WebElement> elements = shadow.findElements(element, "img");
 		assertThat(elements, notNullValue());
 		assertThat(elements.size(), greaterThan(0));
@@ -127,52 +95,10 @@ public class ShadowTest {
 
 	@Test
 	public void testAPICalls5() {
-		List<WebElement> elements = shadow
-				.findElements(shadow.findElement(urlLocator), "#wrapperLink");
+		List<WebElement> elements = shadow.findElements(shadow.findElement(urlLocator), "#wrapperLink");
 		assertThat(elements, notNullValue());
 		assertThat(elements.size(), greaterThan(0));
 		err.println(String.format("Found %d elements: ", elements.size()));
-		elements.stream()
-				.map(o -> String.format("outerHTML: %s", o.getAttribute("outerHTML")))
-				.forEach(err::println);
+		elements.stream().map(o -> String.format("outerHTML: %s", o.getAttribute("outerHTML"))).forEach(err::println);
 	}
-
-	@AfterEach
-	public void tearDown() {
-	}
-
-	@AfterAll
-	public static void tearDownAll() {
-		driver.close();
-	}
-
-	public static String getPropertyEnv(String name, String defaultValue) {
-		String value = System.getProperty(name);
-		if (debug) {
-			err.println("system property " + name + " = " + value);
-		}
-		if (value == null || value.length() == 0) {
-			value = System.getenv(name);
-			if (debug) {
-				err.println("system env " + name + " = " + value);
-			}
-			if (value == null || value.length() == 0) {
-				value = defaultValue;
-				if (debug) {
-					err.println("default value  = " + value);
-				}
-			}
-		}
-		return value;
-	}
-
-	public static boolean checkEnvironment() {
-		Map<String, String> env = System.getenv();
-		boolean result = false;
-		if (env.containsKey("TRAVIS") && env.get("TRAVIS").equals("true")) {
-			result = true;
-		}
-		return result;
-	}
-
 }
