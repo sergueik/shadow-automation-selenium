@@ -41,8 +41,7 @@ public class LocalFileTest {
 	private static Shadow shadow = null;
 	private static String browser = getPropertyEnv("BROWSER",
 			getPropertyEnv("webdriver.driver", "chrome"));
-	// export BROWSER=firefox or
-	// use -Pfirefox to override
+	// export BROWSER=firefox or specify profile -Pfirefox to override
 	@SuppressWarnings("unused")
 	private static final boolean headless = Boolean
 			.parseBoolean(getPropertyEnv("HEADLESS", "false"));

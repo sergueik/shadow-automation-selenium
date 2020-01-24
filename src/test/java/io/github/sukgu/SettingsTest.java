@@ -26,37 +26,34 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.ElementClickInterceptedException;
+import org.openqa.selenium.ElementNotVisibleException;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
 import io.github.sukgu.Shadow;
 
-// TODO: skip when run with firefox browser
+// the tests will get skipped when run on Firefox
 public class SettingsTest {
 
 	private final static String baseUrl = "chrome://settings/";
-	// private static final String urlLocator = "#basicPage >
-	// settings-section[page-title='Search engine']";
-	// TODO: sanitize on the fly
-	private static final String urlLocator = "#basicPage > settings-section[page-title=\"Search engine\"]";
-	private static final String shadowLocator = "#card";
-	private static final boolean debug = Boolean
-			.parseBoolean(getPropertyEnv("DEBUG", "false"));;
+	private static String urlLocator = null;
+	private static String shadowLocator = null;
+	private static String shadow2Locator = null;
+	private static final boolean debug = Boolean.parseBoolean(getPropertyEnv("DEBUG", "false"));;
 
 	private static boolean isCIBuild = checkEnvironment();
 
 	private static WebDriver driver = null;
+	public Actions actions;
 	private static Shadow shadow = null;
-	private static String browser = getPropertyEnv("BROWSER",
-			getPropertyEnv("webdriver.driver", "chrome"));
+	private static String browser = getPropertyEnv("BROWSER", getPropertyEnv("webdriver.driver", "chrome"));
 
-	private static final BrowserChecker browserChecker = new BrowserChecker(
-			browser);
-	// export BROWSER=firefox or
-	// use -Pfirefox to override
+	private static final BrowserChecker browserChecker = new BrowserChecker(browser);
+	// export BROWSER=firefox or specify profile -Pfirefox to override
 
 	@SuppressWarnings("unused")
-	private static final boolean headless = Boolean
-			.parseBoolean(getPropertyEnv("HEADLESS", "false"));
+	private static final boolean headless = Boolean.parseBoolean(getPropertyEnv("HEADLESS", "false"));
 
 	@BeforeAll
 	public static void injectShadowJS() {
@@ -79,42 +76,71 @@ public class SettingsTest {
 		driver.navigate().to("about:blank");
 	}
 
-	// @Ignore
 	@Test
-	public void testGetAllObject() {
+	public void test1() {
+		urlLocator = "#basicPage > settings-section[page-title=\"Search engine\"]";
+		shadowLocator = "#card";
+
 		Assumptions.assumeTrue(browser.equals("chrome"));
 		driver.navigate().to(baseUrl);
 		List<WebElement> elements = shadow.findElements(urlLocator);
 		assertThat(elements, notNullValue());
 		assertThat(elements.size(), greaterThan(0));
-		err.println(
-				String.format("Located %d %s elements:", elements.size(), urlLocator));
+		err.println(String.format("Located %d %s elements:", elements.size(), urlLocator));
 		// NOTE: default toString() is not be particularly useful
 		elements.stream().forEach(err::println);
 		elements.stream().map(o -> o.getTagName()).forEach(err::println);
-		elements.stream()
-				.map(o -> String.format("innerHTML: %s", o.getAttribute("innerHTML")))
-				.forEach(err::println);
-		elements.stream()
-				.map(o -> String.format("outerHTML: %s", o.getAttribute("outerHTML")))
-				.forEach(err::println);
+		elements.stream().map(o -> String.format("innerHTML: %s", o.getAttribute("innerHTML"))).forEach(err::println);
+		elements.stream().map(o -> String.format("outerHTML: %s", o.getAttribute("outerHTML"))).forEach(err::println);
 	}
 
-	// TODO: deal with AssumptionViolatedException in junit 5 ?
 	@Test
-	public void testAPICalls5() {
+	public void test2() {
 		Assumptions.assumeTrue(browserChecker.testingChrome());
+		urlLocator = "#basicPage > settings-section[page-title=\"Search engine\"]";
+		shadowLocator = "#card";
 		driver.navigate().to(baseUrl);
 		WebElement element = shadow.findElement(urlLocator);
-		err.println(
-				String.format("outerHTML: %s", element.getAttribute("outerHTML")));
+		err.println(String.format("outerHTML: %s", element.getAttribute("outerHTML")));
 		List<WebElement> elements = shadow.findElements(element, shadowLocator);
 		assertThat(elements, notNullValue());
 		assertThat(elements.size(), greaterThan(0));
 		err.println(String.format("Found %d elements: ", elements.size()));
-		elements.stream()
-				.map(o -> String.format("outerHTML: %s", o.getAttribute("outerHTML")))
-				.forEach(err::println);
+		elements.stream().map(o -> String.format("outerHTML: %s", o.getAttribute("outerHTML"))).forEach(err::println);
+	}
+
+	// @Disabled("Disabled until execptions   of element is addressed")
+	@Test
+	public void test3() {
+		Assumptions.assumeTrue(browserChecker.testingChrome());
+		urlLocator = "#basicPage > settings-section[page-title=\"Default browser\"]";
+		shadowLocator = "settings-default-browser-page";
+		shadow2Locator = "div#canBeDefaultBrowser";
+		driver.navigate().to(baseUrl);
+		WebElement element = shadow.findElement(urlLocator);
+		err.println(String.format("outerHTML: %s", element.getAttribute("outerHTML")));
+		try {
+			actions = new Actions(driver);
+			actions.moveToElement(element).build().perform();
+			sleep(1000);
+			actions.click().build().perform();
+			sleep(1000);
+			element.click();
+		} catch (ElementClickInterceptedException e) {
+			// element click intercepted: Element is not clickable at point
+
+		}
+		sleep(1000);
+		// shadowLocator = "*"; // anything! - does not work either
+		// NOTE: hanging the browser!
+		try {
+			WebElement element2 = shadow.findElement(element, shadowLocator);
+			assertThat(element2, notNullValue());
+			WebElement element3 = shadow.findElement(element2, shadow2Locator);
+			assertThat(element3, notNullValue());
+		} catch (ElementNotVisibleException e) {
+			// Element with CSS settings-default-browser-page is not present on screen
+		}
 	}
 
 	@AfterEach
@@ -168,4 +194,13 @@ public class SettingsTest {
 			return (this.browser.equals("chrome"));
 		}
 	}
+
+	public void sleep(Integer milliSeconds) {
+		try {
+			Thread.sleep((long) milliSeconds);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+
 }

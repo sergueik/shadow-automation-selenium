@@ -26,7 +26,6 @@ import io.github.bonigarcia.wdm.WebDriverManager;
 public class ShadowTest {
 
 	private final static String baseUrl = "https://www.virustotal.com";
-	// private static final String urlLocator = "a[data-route='url']";
 	private static final String urlLocator = "*[data-route='url']";
 	private static final boolean debug = Boolean
 			.parseBoolean(getPropertyEnv("DEBUG", "false"));;
@@ -37,8 +36,7 @@ public class ShadowTest {
 	private static Shadow shadow = null;
 	private static String browser = getPropertyEnv("BROWSER",
 			getPropertyEnv("webdriver.driver", "chrome"));
-	// export BROWSER=firefox or
-	// use -Pfirefox to override
+	// export BROWSER=firefox or specify profile -Pfirefox to override
 	@SuppressWarnings("unused")
 	private static final boolean headless = Boolean
 			.parseBoolean(getPropertyEnv("HEADLESS", "false"));
@@ -61,11 +59,6 @@ public class ShadowTest {
 
 	@BeforeEach
 	public void init() {
-
-	}
-
-	@Test
-	public void testApp() {
 
 	}
 
