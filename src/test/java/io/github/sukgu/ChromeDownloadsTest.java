@@ -34,11 +34,13 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
 import io.github.sukgu.BaseTest;
+import io.github.sukgu.LocalFileTest;
 
 // this test methods will get skipped when run on Firefox
 public class ChromeDownloadsTest {
 
 	private static boolean isCIBuild = BaseTest.checkEnvironment();
+	private final String filePath = "download.html";
 
 	protected static final boolean debug = Boolean.parseBoolean(BaseTest.getPropertyEnv("DEBUG", "false"));
 
@@ -106,23 +108,23 @@ public class ChromeDownloadsTest {
 		}
 	}
 
+	// using Assumptions in @Before and @After is not the best practice
 	@BeforeEach
 	public void init() {
-		Assumptions.assumeTrue(browser.equals("chrome"));
-		Assumptions.assumeFalse(isCIBuild);
-		driver.navigate().to("about:blank");
+		if ((browser.equals("chrome") && !isCIBuild)) {
+			driver.navigate().to("about:blank");
+		}
 	}
 
-	// TODO: ordering
+	// download PDF have to be run first
 	@Test
-	public void test1() { // downloadPDFTest
+	public void test1() {
 
 		Assumptions.assumeTrue(browser.equals("chrome"));
 		Assumptions.assumeFalse(isCIBuild);
 
-		driver.navigate().to("https://intellipaat.com/blog/tutorial/selenium-tutorial/selenium-cheat-sheet/");
-		WebElement element = driver
-				.findElement(By.xpath("//*[@id=\"global\"]//a[contains(@href, \"Selenium-Cheat-Sheet.pdf\")]"));
+		driver.navigate().to(LocalFileTest.getPageContent(filePath));
+		WebElement element = driver.findElement(By.xpath("//a[contains(@href, \"wikipedia.pdf\")]"));
 		element.click();
 		sleep(5000);
 	}
@@ -147,16 +149,16 @@ public class ChromeDownloadsTest {
 		assertThat(element5, notNullValue());
 		System.err.println("Result element: " + element5.getAttribute("outerHTML"));
 		final String element4HTML = element5.getAttribute("innerHTML");
-		assertThat(element4HTML, containsString("Selenium-Cheat-Sheet"));
+		assertThat(element4HTML, containsString("wikipedia"));
 		// NOTE: the getText() is failing
 		try {
-			assertThat(element4.getText(), containsString("Selenium-Cheat-Sheet"));
+			assertThat(element4.getText(), containsString("wikipedia"));
 		} catch (AssertionError e) {
 			System.err.println("Exception (ignored) " + e.toString());
 		}
-		// can be OS-specific: "Selenium-Cheat-Sheet (10).pdf"
+		// can be OS-specific: "wikipedia (10).pdf"
 
-		Pattern pattern = Pattern.compile(String.format(".*Selenium-Cheat-Sheet(?:%s)*.pdf", " \\((\\d+)\\)"),
+		Pattern pattern = Pattern.compile(String.format("wikipedia(?:%s)*\\.pdf", " \\((\\d+)\\)"),
 				Pattern.CASE_INSENSITIVE);
 		Matcher matcher = pattern.matcher(element4HTML);
 		assertThat(matcher.find(), is(true));
@@ -186,9 +188,9 @@ public class ChromeDownloadsTest {
 
 	@AfterEach
 	public void AfterMethod() {
-		Assumptions.assumeTrue(browser.equals("chrome"));
-		Assumptions.assumeFalse(isCIBuild);
-		driver.get("about:blank");
+		if ((browser.equals("chrome") && !isCIBuild)) {
+			driver.get("about:blank");
+		}
 	}
 
 	@AfterAll
