@@ -108,6 +108,8 @@ public class ChromeDownloadsTest {
 
 	@BeforeEach
 	public void init() {
+		Assumptions.assumeTrue(browser.equals("chrome"));
+		Assumptions.assumeFalse(isCIBuild);
 		driver.navigate().to("about:blank");
 	}
 
@@ -184,12 +186,16 @@ public class ChromeDownloadsTest {
 
 	@AfterEach
 	public void AfterMethod() {
+		Assumptions.assumeTrue(browser.equals("chrome"));
+		Assumptions.assumeFalse(isCIBuild);
 		driver.get("about:blank");
 	}
 
 	@AfterAll
 	public static void tearDownAll() {
-		driver.close();
+		if (driver != null) {
+			driver.close();
+		}
 	}
 
 	// origin: https://reflectoring.io/conditional-junit4-junit5-tests/
