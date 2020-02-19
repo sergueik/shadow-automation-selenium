@@ -34,7 +34,7 @@ import io.github.bonigarcia.wdm.WebDriverManager;
 import io.github.sukgu.Shadow;
 
 // the tests will get skipped when run on Firefox
-public class SettingsTest extends BaseTest {
+public class ChromeSettingsTest extends BaseTest {
 
 	private final static String baseUrl = "chrome://settings/";
 	private static String urlLocator = null;
