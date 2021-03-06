@@ -127,14 +127,4 @@ public class LocalFileTest extends BaseTest {
 		driver.close();
 	}
 
-	protected static String getPageContent(String pagename) {
-		try {
-			URI uri = LocalFileTest.class.getClassLoader().getResource(pagename).toURI();
-			err.println("Testing local file: " + uri.toString());
-			return uri.toString();
-		} catch (URISyntaxException e) { // NOTE: multi-catch statement is not
-			// supported in -source 1.6
-			throw new RuntimeException(e);
-		}
-	}
 }

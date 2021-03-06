@@ -137,6 +137,46 @@ If you want to use wait to synchronize your scripts then you should use the impl
 * In Explicit wait, the driver will wait for at max n seconds as set in **shadow.setImplicitWait(n,m)**. In between driver will check for presence of WebElement every m seconds.
   
   ###### Note: > is used to combine multi level dom structure. So you can combine 5 levels of dom. If you want some more level modify the script and ready to rock.
+
+### More Usage
+
+The __Shadow Root DOM Automation__  allows one get rid of fragile and Javasrcipt-heavy calls like
+```java
+String locator1 = "autohistory-card";
+String locator2 = "button-ui";
+String locator3 = "button";
+// traversing nested Shadow Root elements, found quite often
+WebElement element = (WebElement) (js.executeScript(String.format(
+    "return document.querySelector('%s')"
+  + ".shadowRoot.querySelector('%s')"
+  + ".shadowRoot.querySelector('%s')",
+  locator, locator2, locator3)));
+assertThat(element, notNullValue());
+```
+and replace them with core Selenium-like chained methods like
+```java
+driver.navigate().to("https://avtokod.mos.ru/Autohistory#!/Home");
+String locator1 = "autohistory-card";
+String locator2 = "button-ui";
+String locator3 = "button";
+
+
+WebElement element1 = driver.findElement(By.tagName(locator1));
+WebElement elements2 = shadowDriver.getAllShadowElement(element1,locator2).get(0);
+WebElement element3 = shadowDriver.getAllShadowElement(element2, locator3).get(0);
+assertThat(element3, notNullValue());
+```
+and other methods listed above
+
+JAva 9 stream methods are also supported  and useful, helping one browsing the DOM tree inside the shadow root, from Java test.
+```
+driver.navigate().to("https://avtokod.mos.ru/Autohistory#!/Home");
+String locator = "autohistory-card";
+List<WebElement> elements = shadowDriver.findElements(locator);
+  elements.stream()
+    .map(o -> o.getAttribute("outerHTML"))
+    .forEach(System.err::println);
+```
+
   
   **Documentation** [Link](https://github.com/sukgu/shadow-automation-selenium/wiki)
-  
