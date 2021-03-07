@@ -17,6 +17,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.junit.Assume;
+import org.junit.Before;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assumptions;
@@ -37,10 +39,11 @@ import io.github.bonigarcia.wdm.WebDriverManager;
 import io.github.sukgu.BaseTest;
 
 // this test methods will get skipped when run on Firefox
-public class ChromeDownloadsTest {
+public class ChromeHistoryTest {
 
 	private static boolean isCIBuild = BaseTest.checkEnvironment();
-	private static final String url = "chrome://downloads/";
+	private static final String url = "chrome://history/";
+	private final String site = "www.wikipedia.org";
 
 	private static final boolean debug = Boolean
 			.parseBoolean(BaseTest.getPropertyEnv("DEBUG", "false"));
@@ -59,9 +62,6 @@ public class ChromeDownloadsTest {
 	private static List<WebElement> elements = new ArrayList<>();
 	private static WebElement element = null;
 	private static WebElement element2 = null;
-	private static WebElement element3 = null;
-	private static WebElement element4 = null;
-	private static WebElement element5 = null;
 	private static String html = null;
 
 	@SuppressWarnings("deprecation")
@@ -126,92 +126,66 @@ public class ChromeDownloadsTest {
 
 	// using Assumptions in @Before and @After is not the best practice
 	@BeforeEach
-	public void init() {
-		if ((browser.equals("chrome") && !isCIBuild)) {
-			driver.navigate().to("about:blank");
-		}
-	}
-
-	// download PDF have to be run first
-	@BeforeEach
-	public void download() {
-
-		Assumptions.assumeTrue(browser.equals("chrome"));
+	public void browse() {
+		Assumptions.assumeTrue(browserChecker.testingChrome());
 		Assumptions.assumeFalse(isCIBuild);
-		driver.navigate().to(BaseTest.getPageContent("download.html"));
-		element = driver
-				.findElement(By.xpath("//a[contains(@href, \"wikipedia.pdf\")]"));
-		element.click();
-		sleep(1000);
+		driver.navigate().to(String.format("https://%s", site));
 	}
 
 	@Test
-	public void test2() { // listDownloadsShadowTest
+	public void test1() {
 		Assumptions.assumeTrue(browserChecker.testingChrome());
 		Assumptions.assumeFalse(isCIBuild);
+		Assumptions.assumeFalse(headless);
+
 		driver.navigate().to(url);
-		element = driver.findElement(By.tagName("downloads-manager"));
-		elements = shadow.getAllShadowElement(element, "#downloadsList");
+		element = driver.findElement(By.cssSelector("#history-app"));
+		elements = shadow.getAllShadowElement(element, "#main-container #content");
 		assertThat(elements, notNullValue());
 		assertThat(elements.size(), greaterThan(0));
 		element = elements.get(0);
 		if (debug)
-			err.println(
-					String.format("Located element:", element.getAttribute("outerHTML")));
-		element2 = element.findElement(By.tagName("downloads-item"));
-		assertThat(element2, notNullValue());
-		element3 = shadow.getShadowElement(element2, "div#details");
-		assertThat(element3, notNullValue());
-		if (debug)
 			System.err
-					.println("Result element: " + element3.getAttribute("outerHTML"));
-		element4 = element3.findElement(By.cssSelector("span#name"));
-		assertThat(element4, notNullValue());
-		if (debug)
-			System.err
-					.println("Result element: " + element4.getAttribute("outerHTML"));
-		html = element4.getAttribute("innerHTML");
-		assertThat(html, containsString("wikipedia"));
-		// NOTE: the getText() is failing
-		try {
-			assertThat(element3.getText(), containsString("wikipedia"));
-		} catch (AssertionError e) {
-			System.err.println("Exception (ignored) " + e.toString());
-		}
-		// can be OS-specific: "wikipedia (10).pdf"
+					.println("Element(1) HTML: " + element.getAttribute("innerHTML"));
+		element2 = element.findElement(By.cssSelector("#history"));
 
-		Pattern pattern = Pattern.compile(
-				String.format("wikipedia(?:%s)*\\.pdf", " \\((\\d+)\\)"),
-				Pattern.CASE_INSENSITIVE);
-		Matcher matcher = pattern.matcher(html);
-		assertThat(matcher.find(), is(true));
-		assertThat(pattern.matcher(html).find(), is(true));
-		element4 = element3.findElement(By.cssSelector("a#url"));
-		assertThat(element4, notNullValue());
-		if (debug)
-			System.err
-					.println("Inspecting element: " + element4.getAttribute("outerHTML"));
-		shadow.scrollTo(element4);
-		element2 = shadow.getParentElement(element4);
-		assertThat(element2, notNullValue());
-		assertThat(shadow.isVisible(element2), is(true));
-		html = element2.getAttribute("outerHTML");
-		if (debug)
-			System.err.println("Inspecting parent element: " + html);
-		try {
-			assertThat(shadow.getAttribute(element2, "outerHTML"), notNullValue());
-			assertThat(shadow.getAttribute(element2, "outerHTML"),
-					containsString(html));
-			System.err.println("Vefified attribute extraction: "
-					+ shadow.getAttribute(element2, "outerHTML"));
-		} catch (AssertionError e) {
-			System.err.println("Exception (ignored): " + e.toString());
-		}
-		elements = shadow.getChildElements(element2);
+		elements = shadow.getAllShadowElement(element2,
+				".history-cards history-item");
 		assertThat(elements, notNullValue());
 		assertThat(elements.size(), greaterThan(0));
-		sleep(1000);
-		// cannot access instance method of BaseTest using static reference
+		element2 = elements.get(0);
+		assertThat(element2, notNullValue());
+		if (debug)
+			System.err
+					.println("Element(2) HTML: " + element2.getAttribute("outerHTML"));
+		elements = shadow.getAllShadowElement(element2, "#main-container");
+		assertThat(elements, notNullValue());
+		assertThat(elements.size(), greaterThan(0));
+		element = elements.get(0);
+		if (debug)
+			System.err
+					.println("Element(3) HTML: " + element.getAttribute("outerHTML"));
+		elements = element.findElements(By.cssSelector("#date-accessed"));
+		assertThat(elements, notNullValue());
+		assertThat(elements.size(), greaterThan(0));
+		element2 = elements.get(0);
+		assertThat(element2, notNullValue());
+		assertThat(element2.getText(), containsString("Today"));
+		System.err.println("Element(4) text: " + element2.getText());
+		elements = element.findElements(By.cssSelector("#title-and-domain"));
+		assertThat(elements, notNullValue());
+		assertThat(elements.size(), greaterThan(0));
+		element2 = elements.get(0);
+		assertThat(element2, notNullValue());
+		if (debug)
+			System.err
+					.println("Element(5) HTML: " + element2.getAttribute("outerHTML"));
+		elements = element2.findElements(By.cssSelector("#domain"));
+		assertThat(elements, notNullValue());
+		assertThat(elements.size(), greaterThan(0));
+		element2 = elements.get(0);
+		assertThat(element2.getText(), containsString(site));
+		System.err.println("Element(6) text: " + element2.getText());
 	}
 
 	@AfterEach

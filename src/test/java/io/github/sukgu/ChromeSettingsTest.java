@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -40,8 +41,13 @@ public class ChromeSettingsTest extends BaseTest {
 	private static String urlLocator = null;
 	private static String shadowLocator = null;
 	private static String shadow2Locator = null;
+	private List<WebElement> elements = new ArrayList<>();
+	private WebElement element = null;
+	private WebElement element2 = null;
+	private WebElement element3 = null;
 
-	private static final BrowserChecker browserChecker = new BrowserChecker(getBrowser());
+	private static final BrowserChecker browserChecker = new BrowserChecker(
+			getBrowser());
 	// export BROWSER=firefox or specify profile -Pfirefox to override
 
 	@BeforeEach
@@ -56,15 +62,20 @@ public class ChromeSettingsTest extends BaseTest {
 
 		Assumptions.assumeTrue(getBrowser().equals("chrome"));
 		driver.navigate().to(baseUrl);
-		List<WebElement> elements = shadow.findElements(urlLocator);
+		elements = shadow.findElements(urlLocator);
 		assertThat(elements, notNullValue());
 		assertThat(elements.size(), greaterThan(0));
-		err.println(String.format("Located %d %s elements:", elements.size(), urlLocator));
+		err.println(
+				String.format("Located %d %s elements:", elements.size(), urlLocator));
 		// NOTE: default toString() is not be particularly useful
 		elements.stream().forEach(err::println);
 		elements.stream().map(o -> o.getTagName()).forEach(err::println);
-		elements.stream().map(o -> String.format("innerHTML: %s", o.getAttribute("innerHTML"))).forEach(err::println);
-		elements.stream().map(o -> String.format("outerHTML: %s", o.getAttribute("outerHTML"))).forEach(err::println);
+		elements.stream()
+				.map(o -> String.format("innerHTML: %s", o.getAttribute("innerHTML")))
+				.forEach(err::println);
+		elements.stream()
+				.map(o -> String.format("outerHTML: %s", o.getAttribute("outerHTML")))
+				.forEach(err::println);
 	}
 
 	@Test
@@ -73,13 +84,16 @@ public class ChromeSettingsTest extends BaseTest {
 		urlLocator = "#basicPage > settings-section[page-title=\"Search engine\"]";
 		shadowLocator = "#card";
 		driver.navigate().to(baseUrl);
-		WebElement element = shadow.findElement(urlLocator);
-		err.println(String.format("outerHTML: %s", element.getAttribute("outerHTML")));
-		List<WebElement> elements = shadow.findElements(element, shadowLocator);
+		element = shadow.findElement(urlLocator);
+		err.println(
+				String.format("outerHTML: %s", element.getAttribute("outerHTML")));
+		elements = shadow.findElements(element, shadowLocator);
 		assertThat(elements, notNullValue());
 		assertThat(elements.size(), greaterThan(0));
 		err.println(String.format("Found %d elements: ", elements.size()));
-		elements.stream().map(o -> String.format("outerHTML: %s", o.getAttribute("outerHTML"))).forEach(err::println);
+		elements.stream()
+				.map(o -> String.format("outerHTML: %s", o.getAttribute("outerHTML")))
+				.forEach(err::println);
 	}
 
 	// @Disabled("Disabled until execptions of element is addressed")
@@ -90,8 +104,9 @@ public class ChromeSettingsTest extends BaseTest {
 		shadowLocator = "settings-default-browser-page";
 		shadow2Locator = "div#canBeDefaultBrowser";
 		driver.navigate().to(baseUrl);
-		WebElement element = shadow.findElement(urlLocator);
-		err.println(String.format("outerHTML: %s", element.getAttribute("outerHTML")));
+		element = shadow.findElement(urlLocator);
+		err.println(
+				String.format("outerHTML: %s", element.getAttribute("outerHTML")));
 		try {
 			/*
 			 * 
@@ -107,9 +122,9 @@ public class ChromeSettingsTest extends BaseTest {
 		// shadowLocator = "*";
 		// anything! - does not work either
 		try {
-			WebElement element2 = shadow.findElement(element, shadowLocator);
+			element2 = shadow.findElement(element, shadowLocator);
 			assertThat(element2, notNullValue());
-			WebElement element3 = shadow.findElement(element2, shadow2Locator);
+			element3 = shadow.findElement(element2, shadow2Locator);
 			assertThat(element3, notNullValue());
 		} catch (ElementNotVisibleException e) {
 			System.err.println("Exception (ignored): " + e.getMessage());
