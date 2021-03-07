@@ -54,13 +54,16 @@ public class ShadowTest extends BaseTest {
 		 * String.format("innerHTML: %s", o.getAttribute("innerHTML")))
 		 * .forEach(err::println);
 		 */
-		elements.stream().map(o -> String.format("outerHTML: %s", o.getAttribute("outerHTML"))).forEach(err::println);
+		elements.stream()
+				.map(o -> String.format("outerHTML: %s", o.getAttribute("outerHTML")))
+				.forEach(err::println);
 	}
 
 	@Test
 	public void testAPICalls1() {
-		WebElement element = shadow.findElements(urlLocator).stream().filter(o -> o.getTagName().matches("div"))
-				.collect(Collectors.toList()).get(0);
+		WebElement element = shadow.findElements(urlLocator).stream()
+				.filter(o -> o.getTagName().matches("div")).collect(Collectors.toList())
+				.get(0);
 
 		WebElement element1 = shadow.getNextSiblingElement(element);
 		assertThat(element1, notNullValue());
@@ -69,8 +72,9 @@ public class ShadowTest extends BaseTest {
 
 	@Test
 	public void testAPICalls2() {
-		WebElement element = shadow.findElements(urlLocator).stream().filter(o -> o.getTagName().matches("div"))
-				.collect(Collectors.toList()).get(0);
+		WebElement element = shadow.findElements(urlLocator).stream()
+				.filter(o -> o.getTagName().matches("div")).collect(Collectors.toList())
+				.get(0);
 		List<WebElement> elements = shadow.findElements(element, "img");
 		assertThat(elements, notNullValue());
 		assertThat(elements.size(), greaterThan(0));
@@ -95,10 +99,14 @@ public class ShadowTest extends BaseTest {
 
 	@Test
 	public void testAPICalls5() {
-		List<WebElement> elements = shadow.findElements(shadow.findElement(urlLocator), "#wrapperLink");
+		List<WebElement> elements = shadow
+				.findElements(shadow.findElement(urlLocator), "#wrapperLink");
 		assertThat(elements, notNullValue());
 		assertThat(elements.size(), greaterThan(0));
 		err.println(String.format("Found %d elements: ", elements.size()));
-		elements.stream().map(o -> String.format("outerHTML: %s", o.getAttribute("outerHTML"))).forEach(err::println);
+		elements.stream()
+				.map(o -> String.format("outerHTML: %s", o.getAttribute("outerHTML")))
+				.forEach(err::println);
 	}
+
 }

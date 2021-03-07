@@ -46,15 +46,6 @@ public class ChromeSettingsTest extends BaseTest {
 	private WebElement element2 = null;
 	private WebElement element3 = null;
 
-	private static final BrowserChecker browserChecker = new BrowserChecker(
-			getBrowser());
-	// export BROWSER=firefox or specify profile -Pfirefox to override
-
-	@BeforeEach
-	public void init() {
-		driver.navigate().to("about:blank");
-	}
-
 	@Test
 	public void test1() {
 		urlLocator = "#basicPage > settings-section[page-title=\"Search engine\"]";
@@ -100,6 +91,7 @@ public class ChromeSettingsTest extends BaseTest {
 	@Test
 	public void test3() {
 		Assumptions.assumeTrue(browserChecker.testingChrome());
+		Assumptions.assumeFalse(isCIBuild);
 		urlLocator = "#basicPage > settings-section[page-title=\"Default browser\"]";
 		shadowLocator = "settings-default-browser-page";
 		shadow2Locator = "div#canBeDefaultBrowser";
@@ -129,20 +121,6 @@ public class ChromeSettingsTest extends BaseTest {
 		} catch (ElementNotVisibleException e) {
 			System.err.println("Exception (ignored): " + e.getMessage());
 			// Element with CSS settings-default-browser-page is not present on screen
-		}
-	}
-
-	// origin: https://reflectoring.io/conditional-junit4-junit5-tests/
-	// probably an overkill
-	public static class BrowserChecker {
-		private String browser;
-
-		public BrowserChecker(String browser) {
-			this.browser = browser;
-		}
-
-		public boolean testingChrome() {
-			return (this.browser.equals("chrome"));
 		}
 	}
 

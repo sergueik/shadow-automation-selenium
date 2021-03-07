@@ -34,7 +34,7 @@ import io.github.sukgu.BaseTest;
 public class BaseTest {
 
 	private static Map<String, String> env = System.getenv();
-	private static boolean isCIBuild = checkEnvironment();
+	protected static boolean isCIBuild = checkEnvironment();
 
 	protected static final boolean debug = Boolean
 			.parseBoolean(getPropertyEnv("DEBUG", "false"));
@@ -42,15 +42,19 @@ public class BaseTest {
 	protected static WebDriver driver = null;
 	protected static Actions actions;
 	protected static Shadow shadow = null;
-	private static String browser = getPropertyEnv("BROWSER",
+	protected static String browser = getPropertyEnv("BROWSER",
 			getPropertyEnv("webdriver.driver", "chrome"));
+
+	protected static final BrowserChecker browserChecker = new BrowserChecker(
+			getBrowser());
+	// export BROWSER=firefox or specify profile -Pfirefox to override
 
 	// export BROWSER=firefox or use -Pfirefox to override
 	public static String getBrowser() {
 		return browser;
 	}
 
-	private static final boolean headless = Boolean
+	protected static final boolean headless = Boolean
 			.parseBoolean(getPropertyEnv("HEADLESS", "false"));
 
 	@SuppressWarnings("deprecation")
@@ -188,12 +192,15 @@ public class BaseTest {
 	}
 
 	@AfterEach
-	public void tearDown() {
+	public void AfterMethod() {
+		if (driver != null)
+			driver.get("about:blank");
 	}
 
 	@AfterAll
 	public static void tearDownAll() {
 		driver.close();
+		driver.quit();
 	}
 
 	// Utilities
@@ -251,6 +258,20 @@ public class BaseTest {
 			Thread.sleep((long) milliSeconds);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
+		}
+	}
+
+	// origin: https://reflectoring.io/conditional-junit4-junit5-tests/
+	// probably an overkill
+	public static class BrowserChecker {
+		private String browser;
+
+		public BrowserChecker(String browser) {
+			this.browser = browser;
+		}
+
+		public boolean testingChrome() {
+			return (this.browser.equals("chrome"));
 		}
 	}
 

@@ -37,24 +37,12 @@ import io.github.bonigarcia.wdm.WebDriverManager;
 import io.github.sukgu.BaseTest;
 
 // this test methods will get skipped when run on Firefox
-public class ChromeDownloadsTest {
+public class ChromeDownloadsTest extends BaseTest {
 
-	private static boolean isCIBuild = BaseTest.checkEnvironment();
 	private static final String url = "chrome://downloads/";
-
-	private static final boolean debug = Boolean
-			.parseBoolean(BaseTest.getPropertyEnv("DEBUG", "false"));
 
 	private static WebDriver driver = null;
 	private static Shadow shadow = null;
-	private static String browser = BaseTest.getPropertyEnv("BROWSER",
-			BaseTest.getPropertyEnv("webdriver.driver", "chrome"));
-
-	private static final BrowserChecker browserChecker = new BrowserChecker(
-			browser);
-
-	private static final boolean headless = Boolean
-			.parseBoolean(BaseTest.getPropertyEnv("HEADLESS", "false"));
 
 	private static List<WebElement> elements = new ArrayList<>();
 	private static WebElement element = null;
@@ -68,6 +56,8 @@ public class ChromeDownloadsTest {
 	@BeforeAll
 	// TODO: merge customizations of download directory to BaseTest
 	public static void setup() {
+		BaseTest.driver.close();
+		BaseTest.driver = null;
 		if (browser.equals("chrome")) {
 			String chromeDriverPath = null;
 			System.err
@@ -214,39 +204,10 @@ public class ChromeDownloadsTest {
 		// cannot access instance method of BaseTest using static reference
 	}
 
-	@AfterEach
-	public void AfterMethod() {
-		if ((browser.equals("chrome") && !isCIBuild)) {
-			driver.get("about:blank");
-		}
-	}
-
 	@AfterAll
 	public static void tearDownAll() {
-		if (driver != null) {
-			driver.close();
-		}
+		driver.close();
+		driver.quit();
 	}
 
-	// origin: https://reflectoring.io/conditional-junit4-junit5-tests/
-	// probably an overkill
-	public static class BrowserChecker {
-		private String browser;
-
-		public BrowserChecker(String browser) {
-			this.browser = browser;
-		}
-
-		public boolean testingChrome() {
-			return (this.browser.equals("chrome"));
-		}
-	}
-
-	public void sleep(Integer milliSeconds) {
-		try {
-			Thread.sleep((long) milliSeconds);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-	}
 }
